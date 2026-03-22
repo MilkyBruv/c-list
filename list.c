@@ -11,7 +11,15 @@ list_t create_list(size_t initial_length)
     return list;
 }
 
-void append_list(list_t *list, int item)
+list_t create_list_from_array(int array[])
+{
+    list_t list = create_list(sizeof(*array) / sizeof(int));
+    fill_list_with_array(&list, array);
+
+    return list;
+}
+
+void append_list(list_t* list, int item)
 {   
     list->len++;
     int* new_list = realloc(list->list, (sizeof(int) * list->len));
@@ -34,6 +42,11 @@ void remove_list_index(list_t* list, size_t index)
     list->list = new_list;
 }
 
+void set_list_index(list_t* list, size_t index, int value)
+{
+    list->list[index] = value;
+}
+
 int pop_list(list_t* list, size_t index)
 {
     int value = list->list[index];
@@ -47,19 +60,24 @@ void fill_list(list_t* list, int value)
     for (size_t i = 0; i < list->len; i++) { list->list[i] = value; }
 }
 
-void clear_list(list_t *list)
+void fill_list_with_array(list_t* list, int array[])
+{
+    for (size_t i = 0; i < list->len; i++) { list->list[i] = array[i]; }
+}
+
+void clear_list(list_t* list)
 {
     list->len = 0;
     free(list->list);
 }
 
-void sort(list_t* list, int (*sort_callback)(int))
+void sort_list(list_t* list, int (*sort_callback)(list_t*, int, int))
 {
     if (sort_callback != NULL)
     {
         for (size_t i = 0; i < list->len; i++)
         {
-            list->list[i] = sort_callback(list->list[i]);
+            list->list[i] = sort_callback(list, list->list[i], i);
         }
     }
     else
@@ -73,8 +91,8 @@ void sort(list_t* list, int (*sort_callback)(int))
 
             for (size_t i = 0; i < list->len - 1; i++, j++)
             {
-                size_t temp_left = list->list[i];
-                size_t temp_right = list->list[j];
+                temp_left = list->list[i];
+                temp_right = list->list[j];
 
                 if (list->list[i] > list->list[j])
                 {
